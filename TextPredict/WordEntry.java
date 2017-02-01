@@ -6,7 +6,6 @@ import java.util.ArrayList;
 // as well as how many times said word came directly after the key
 // e.g. if in your text you had "hello world" twice, "hello alice" five times, and "hello bob" twice, then it should have:
 // "hello" -> <"alice", 5>, <"world", 2>, <"bob", 2>
-// TODO: sort by occurrences
 
 public class WordEntry{
 	private String keyWord;
@@ -48,6 +47,13 @@ public class WordEntry{
 		System.out.println("WordEntry for: " + keyWord);
 		for (int i = 0; i < follows.size(); i++){
 			System.out.println("\t" + follows.get(i).getWord() + ": " + follows.get(i).getCount());
+		}
+	}
+
+	public void printTop3(){
+		System.out.println("Top 3 for: " + keyWord);
+		for (int i = 0; i < 3 && i < follows.size(); i++){
+			System.out.println("\t" + follows.get(i).getWord()); 
 		}
 	}
 
