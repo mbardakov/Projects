@@ -1,3 +1,8 @@
+// TextPredict: Simulates a phone's "auto-predict" function by reading a reference file with some text (given as a command line argument),
+// Then reads one word at a time from stdin, giving you the top 3 words that followed the word you typed in, if applicable.
+
+// Usage: java TextPredict myFile.txt
+
 import java.util.HashMap;
 import java.util.Scanner;
 import java.util.ArrayList;
