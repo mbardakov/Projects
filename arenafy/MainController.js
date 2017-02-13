@@ -59,6 +59,27 @@ app.controller('MainController', ['$scope',
             $scope.contestants[$loser].sum += oldWinnerRating;
             $scope.contestants[$winner].wins += 1;
             $scope.contestants[$loser].losses += 1;
+            
+            // after winner's score increases, may have to move up in list
+            while ($winner > 0 &&
+              $scope.getPerformanceRating($winner) >
+              $scope.getPerformanceRating($winner - 1)){
+
+              var temp = $scope.contestants[$winner];
+              $scope.contestants[$winner] = $scope.contestants[$winner-1];
+              $scope.contestants[$winner-1] = temp;
+              $winner--;
+            }
+            // loser may have to move down
+            while ($loser < ($scope.contestants.length - 1) &&
+            $scope.getPerformanceRating($loser) <
+            $scope.getPerformanceRating($loser + 1)){
+              var temp = $scope.contestants[$loser];
+              $scope.contestants[$loser] = $scope.contestants[$loser+1];
+              $scope.contestants[$loser+1] = temp;
+              $loser++;
+            }
+
             $scope.left = Math.floor(Math.random() * $scope.contestants.length);
             $scope.right = Math.floor(($scope.left + (1 + Math.random() * ($scope.contestants.length - 1))) % $scope.contestants.length);
         };
@@ -75,6 +96,13 @@ app.controller('MainController', ['$scope',
                 $scope.contestants.splice(0, 1);
                 $scope.left = 0;
                 $scope.right = 1;
+            }
+            var newindex = $scope.contestants.length - 1;
+            while (newindex > 0 && $scope.getPerformanceRating(newindex - 1) < 1200){
+              var temp = $scope.contestants[newindex];
+              $scope.contestants[newindex] = $scope.contestants[newindex-1];
+              $scope.contestants[newindex-1] = temp;
+              newindex--;
             }
             document.getElementById('inputbox').innerHTML = "Add new item";
         };
