@@ -1,6 +1,13 @@
+// TextPredict: Simulates a phone's "auto-predict" function by reading a reference file with some text (given as a command line argument),
+// Then reads one word at a time from stdin, giving you the top 3 words that followed the word you typed in, if applicable.
+
+// Usage: java TextPredict myFile.txt
+
 import java.util.HashMap;
 import java.util.Scanner;
 import java.util.ArrayList;
+import java.io.File;
+import java.io.FileNotFoundException;
 // main program/point of entry
 // reads text from standard input, creates a map of word -> follow-list, where a "follow-list"
 // is a list of all words that come after the given word, and how often they occur directly after said word
@@ -9,38 +16,53 @@ public class TextPredict{
 	public static final String DELIMS = "!?.";
 	public static void main(String[] args){
 		// args is a list of files to read in and analyze
-		int currentFileIndex = 0;
-		Scanner fileScan = new Scanner(/*new File(args[currentFileIndex])*/"symbols..!?words!words? words words?");
 		ArrayList<String> readWords = new ArrayList<String>();
-		fileScan.useDelimiter("[^\\w\\" + DELIMS + "]");
-		// fileScan.useDelimiter("[^\\w]");
-		while (fileScan.hasNext()){
-			String wordsJustRead = fileScan.next();
-			int leftIndex = 0;
-			int rightIndex = 0;
-			while (rightIndex < wordsJustRead.length() - 1){
-				rightIndex = getFirstSymWord(wordsJustRead, DELIMS, leftIndex);
-				System.out.println("adding: " + wordsJustRead.substring(leftIndex, rightIndex));
-				readWords.add(wordsJustRead.substring(leftIndex, rightIndex));
-				leftIndex = rightIndex;
-			}
-		}
-		// NOW AT THIS POINT: readWords is an arrayList of all words and clusters of symbols.
-		// Now you can just add them all to the WordEntry structure (:
-		
 		HashMap<String, WordEntry> dictionary = new HashMap<String, WordEntry>();
-		for (int currentWord = 0; currentWord < readWords.length() - 1; currentWord++){
-			if (hasOverlap(readWords.at(currentWord)), DELIMS){
-				// IF CURRENTWORD IS A BLOCK OF SYMBOLS, SKIP IT
-				// IF NEXT WORD IS A BLOCK OF SYMBOLS, SKIP IT
-				// TODO
+		try {
+			int currentFileIndex = 0;
+			Scanner fileScan = new Scanner(new File(args[currentFileIndex]));
+			fileScan.useDelimiter("[^\\w\\" + DELIMS + "]");
+			// fileScan.useDelimiter("[^\\w]");
+			while (fileScan.hasNext()){
+				String wordsJustRead = fileScan.next();
+				int leftIndex = 0;
+				int rightIndex = 0;
+				while (rightIndex < wordsJustRead.length() - 1){
+					rightIndex = getFirstSymWord(wordsJustRead, DELIMS, leftIndex);
+					System.out.println("adding: " + wordsJustRead.substring(leftIndex, rightIndex));
+					readWords.add(wordsJustRead.substring(leftIndex, rightIndex));
+					leftIndex = rightIndex;
+				}
 			}
-			if (!dictionary.containsKey(readWords.at(currentWord))){
-				dictionary.put(readWords.at(currentWord), new WordEntry(readWords.at(currentWord)));
-			}
-			dictionary.get(readWords.at(currentWord)).insert(readWords.at(currentWord+1));
-		}
+			// NOW AT THIS POINT: readWords is an arrayList of all words and clusters of symbols.
+			// Now you can just add them all to the WordEntry structure (:
 
+			for (int currentWord = 0; currentWord < readWords.size() - 1; currentWord++){
+				if (!hasOverlap(readWords.get(currentWord), DELIMS) &&
+						!hasOverlap(readWords.get(currentWord + 1), DELIMS)){
+					if (!dictionary.containsKey(readWords.get(currentWord))){
+						dictionary.put(readWords.get(currentWord), new WordEntry(readWords.get(currentWord)));
+					} else {
+						dictionary.get(readWords.get(currentWord)).insert(readWords.get(currentWord+1));
+					}	
+				}
+			}
+		} catch (FileNotFoundException ex) {
+			System.err.println("Caught FileNotFoundException: " + ex);
+			System.err.println("Will attempt to continue...");
+		} 
+		Scanner stdin = new Scanner(System.in);
+		stdin.useDelimiter("[^\\w\\" + DELIMS + "]");
+
+		// read stdin and find the top 3 words for whatever was input	
+		while (stdin.hasNext()){
+			String searchWord = stdin.next();
+			if (dictionary.containsKey(searchWord)){
+				dictionary.get(searchWord).printTop3();
+			} else {
+				System.out.println("Error: " + searchWord + " did not appear mid-sentence in any reference material.");
+			}
+		}
 	}
 
 	// getFirstSymWord: String String -> String
